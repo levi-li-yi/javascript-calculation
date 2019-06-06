@@ -125,3 +125,127 @@ const currying2 = fn => judge => (...args) => args.length >= fn.length ? fn(...a
      console.log(a, b, c)
  })
 fn2('a','b','c')
+/*9、偏函数*/
+const partialFunc = (fn, ...args) => {
+    let num = 0
+    return (...args2) => {
+        args2.forEach(arg => {
+            let index = args.findIndex(item => item === '_')
+            if (index < 0) return
+            args[index] = arg
+            num++
+        })
+        if (num < args2.length) {
+            args2 = args2.slice(num, args2.length)
+        }
+        console.log([...args, ...args2]) //  [1, 3, 2, 1, 3]
+        return fn.apply(this, [...args, ...args2])
+    }
+}
+
+let add = (a, b, c, d) => a + b + c + d
+let partAdd = partialFunc(add, '_', '_', 2)
+console.log(partAdd(1, 3))
+
+
+/*10、bind函数实现方法*/
+const isComplexDataType = obj => (typeof obj === 'object' || typeof obj === 'function') && obj !== null
+
+const selfBind = function (target, ...args1) {
+    //target {name: 'test'}sub对象
+    console.log(target)
+    if (typeof this !== 'function')
+        throw new TypeError('Bind must be called on a function')
+    let fn = this
+    let boundFn = function (...args2) {
+        let args = [...args1, ...args2]
+        if (new.target) {
+            let res = fn.apply(this, args) // 核心使用apply
+            if (isComplexDataType(res)) return res
+            return this
+        } else {
+            fn.apply(target, args)// 核心使用apply
+        }
+    }
+    /*原型链继承*/
+    this.prototype && (boundFn.prototype = Object.create(this.prototype))
+    let desc = Object.getOwnPropertyDescriptors(fn)
+    console.log(desc)
+    Object.defineProperties(boundFn, {
+        length: desc.length,
+        name: Object.assign(desc.name, {
+            value: `bound${desc.name.value}`
+        })
+    })
+    return boundFn
+}
+Function.prototype.selfBind = selfBind
+let sub = {
+    name: 'test'
+}
+let sup = function () {
+    console.log(this.name)
+}
+const result = sup.selfBind(sub)
+result()
+
+/*11、函数call实现*/
+const selfCall = function (context, ...args) {
+    let fn = this
+    context || (context = window)
+    if (typeof fn !== 'function') throw new TypeError('this is not a fucntion')
+    let caller = Symbol('caller')
+    context[caller] = fn
+    // 立即执行
+    let res = context[caller](...args)
+    delete context[caller]
+    return res
+}
+
+Function.prototype.selfCall = selfCall
+
+let subCall = {
+    name: 'call name'
+}
+
+let callFn = function () {
+    console.log(this.name)
+}
+callFn.selfCall(subCall)
+
+/*12、简易CO模块*/
+function run (generatorFunc) {
+    let it = generatorFunc()
+    let result = it.next()
+    return new Promise((resolve, reject) => {
+        const next = function (result) {
+            if (result.done) {
+                resolve(result.value)
+            }
+            result.value = Promise.resolve(result.value)
+            result.value.then(res => {
+                let result = it.next(res)
+                next(result)
+            }).catch(err => {
+                reject(err)
+            })
+        }
+        next(result)
+    })
+}
+
+function api(data) {
+    return data
+}
+
+/*定义一个生成器函数*/
+function* func() {
+    /*const data = 0
+    let res = yield api(data)
+    console.log(res)
+    let res2 = yield api(data)
+    console.log(res2)
+    let res3 = yield api(data)
+    console.log(res3)*/
+}
+run(func)
