@@ -248,4 +248,73 @@ function* func() {
     let res3 = yield api(data)
     console.log(res3)*/
 }
-run(func)
+//run(func)
+
+/*13、防抖函数*/
+const debounce = (func, time = 17,
+    options = {
+        leading: true,
+        trailing: true,
+        context: null
+    }
+) => {
+    let timer
+    const _debounce = function(...args) {
+        if (timer) {
+            clearTimeout(timer)
+        }
+        if (options.length && !timer) {
+            timer = setTimeout(null, time)
+            func.apply(options.context, args)
+        } else if (options.trailing) {
+            timer = setTimeout(() => {
+                func.apply(options.context, args)
+                timer = null
+            }, time)
+        }
+    }
+    /*防抖函数向外部暴露的cancel 可以从外部清除计时器*/
+    _debounce.cancel = function() {
+        clearTimeout(time)
+        timer = null
+    }
+    return _debounce
+}
+
+/*14、函数节流*/
+const throttle = (
+    func,
+    time = 17,
+    options = {
+        leading: true,
+        trailing: false,
+        context: null
+    }
+) => {
+    let previous = new Date(0).getTime()
+    let timer
+    const _throttle = function (...args) {
+        let now = new Date().getTime()
+
+        if (!options.leading) {
+            if (timer) return
+            timer = setTimeout(() => {
+                timer = null
+                func.apply(options.context, args)
+            })
+        } else if (now - previous > time) {
+            func.apply(options.context, args)
+            previous = now
+        } else if (options.trailing) {
+            clearTimeout(timer)
+            timer = setTimeout(() => {
+                func.apply(options.context, args)
+            }, time)
+        }
+    }
+    _throttle.cancel = function() {
+        clearTimeout(time)
+        timer = null
+    }
+    return _debounce
+}
