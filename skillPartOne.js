@@ -318,3 +318,173 @@ const throttle = (
     }
     return _debounce
 }
+/*15、图片懒加载*/
+let imgList = [...document.querySelectorAll('img')]
+let num = imgList.length
+
+let lazyLoad = (function() {
+    let count = 0
+    return function() {
+        let deleteIndexList = []
+        imgList.forEach((img, index) => {
+            /*获取图片元素上、左、右、下四条边界相对于浏览器窗口左上角的偏移像素值。*/
+            let rect = img.getBoundingClientRect()
+            if (rect.top < window.innerHeight) {
+                img.src = img.dataset.src
+                deleteIndexList.push(index)
+                count++
+                if (count === num) {
+                    document.removeEventListener(('scroll', lazyLoad))
+                }
+            }
+        })
+        imgList = imgList.filter((_, index) => !deleteIndexList.includes(index))
+    }
+})()
+
+/*添加scroll事件*/
+// document.addEventListener('scroll', lazyLoad)
+
+// IntersectionObserver接口 提供了一种异步观察目标元素与其祖先元素或顶级文档视窗(viewport)交叉状态的方法
+// IntersectionObserver的支持性不是很好；
+// .intersectionRatio > 0表示元素出现在设备的可视区域内
+let lazyLoad1 = function() {
+    let observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.intersectionRatio > 0) {
+                entry.target.src = entry.target.dataset.src
+                observer.unobserve(entry.target)
+            }
+        })
+        imgList.forEach(img => {
+            observer.observe(img)
+        })
+    })
+}
+
+/*16、new 关键字实现*/
+/* const isComplexDataType2 = obj =>
+     (typrof obj === 'object' || typeof obj === 'function') && obj !== null*/
+
+const selfNew = function(fn, ...rest) {
+     let instance = Object.create(fn.prototype)
+    let res = fn.apply(instance, rest)
+    return isComplexDataType ? res : instance
+}
+
+/*17、Object.assgin实现*/
+const selfAssgin = function(target, ...source) {
+    if (target === null)
+        throw new TypeError('is null')
+    return source.reduce((acc, cur) =>
+    {
+        isComplexDataType(acc) || (acc = new Object(acc))
+        if (cur === null) {
+            return acc
+        } else {
+            const list = [...Object.keys(cur), ...Object.getOwnPropertySymbols(cur)]
+            list.forEach((key) => {
+                acc[key] = cur[key]
+            })
+            return acc
+        }
+    },target)
+}
+Object.prototype.selfAssgin = selfAssgin
+console.log(Object.selfAssgin({name: '张三', type: true}, {id: '123', type: false}))
+
+/*18、私有变量--proxy*/
+// handler.ownKeys() 方法用于拦截 Reflect.ownKeys().
+const proxy = function(obj) {
+    return new Proxy(obj, {
+        get(target, key) {
+            if (key.startsWith('_')) {
+                throw new Error('private key')
+            }
+            // Reflect.get() 方法的工作方式，就像从 object (target[propertyKey]) 中获取属性，但它是作为一个函数执行的。
+            return Reflect.get(target, key)
+        },
+        ownKays(target) {
+            // 静态方法 Reflect.ownKeys() 返回一个由目标对象自身的属性键组成的数组
+            return Reflect.ownKeys(target).filter(key => !key.startsWith('_'))
+        }
+    })
+}
+/*19、私有变量--闭包*/
+const Person = (function() {
+    const _name = Symbol('name')
+    class Person {
+        constructor(name) {
+            this[_name] = name
+        }
+        getName() {
+            return this[_name]
+        }
+    }
+    return Person
+})()
+
+let p1 = new Person('jack')
+console.log(p1.getName())
+
+/*20、私有变量--类*/
+ class Person3 {
+     constructor (name) {
+         let _name = name
+         this.getName = function () {
+             return _name
+         }
+     }
+ }
+
+/*21、私有变量--WeakMap*/
+/*WeakMap 相对于普通的 Map，也是键值对集合，只不过 WeakMap 的 key 只能是非空对象（non-null object）。
+WeakMap 对它的 key 仅保持弱引用，也就是说它不阻止垃圾回收器回收它所引用的 key。
+WeakMap 最大的好处是可以避免内存泄漏。一个仅被 WeakMap 作为 key 而引用的对象，会被垃圾回收器回收掉。*/
+// WeakMap同样和map拥有set/get/has/delete,但是没有size
+const Person2 = (function() {
+    let wp = new WeakMap()
+    class Person {
+        constructor(name) {
+            wp.set(this, {name})
+        }
+        getName() {
+            return wp.get(this).name
+        }
+    }
+    return Person
+})()
+
+/*22、洗牌算法--原位算法*/
+function shuffle(arr) {
+    for (let i=0; i<arr.length; i++) {
+        let randomIndex = i + Math.floor(Math.random()*(arr.length - i))
+        [arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]]
+    }
+    return arr
+}
+
+/*23、洗牌算法--非原位算法*/
+function shuffle2(arr) {
+    let _arr = []
+    while (arr.length) {
+        let randomIndex = Math.floor(Math.random()*arr.length)
+        _arr.push(arr.splice(randomIndex, 1)[0])
+    }
+    return _arr
+}
+
+/*24、单例模式*/
+// Reflect.construct() 方法的行为有点像 new 操作符 构造函数 ， 相当于运行 new target(...args).
+function proxy(func) {
+    let instance
+    let handler = {
+        constructor(target, args) {
+            if (!instance) {
+                instance = Reflect.construct(func, args)
+            }
+            return instance
+        }
+    }
+    return new Proxy(func, handler)
+}
