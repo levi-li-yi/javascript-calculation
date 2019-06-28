@@ -458,8 +458,8 @@ const Person2 = (function() {
 /*22、洗牌算法--原位算法*/
 function shuffle(arr) {
     for (let i=0; i<arr.length; i++) {
-        let randomIndex = i + Math.floor(Math.random()*(arr.length - i))
-        [arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]]
+        let randomIndex = i + Math.floor(Math.random()*(arr.length - i));
+            [arr[i], arr[randomIndex]] = [arr[randomIndex], arr[i]]
     }
     return arr
 }
