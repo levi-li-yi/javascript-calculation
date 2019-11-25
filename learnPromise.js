@@ -73,7 +73,7 @@ Promise.prototype.catch = function (onRejected) {
     return this.then(null, onRejected);
 }
 
-// promise解析
+// promise解析直到非promise对象为止
 function resolvePromise(bridgePromise, r, resolve, reject) {
     if (r instanceof MyPromise) {
         if (r.status === PENDING) {
