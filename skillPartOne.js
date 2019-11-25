@@ -316,7 +316,7 @@ const throttle = (
         clearTimeout(time)
         timer = null
     }
-    return _debounce
+    return _throttle
 }
 /*15、图片懒加载*/
 let imgList = [...document.querySelectorAll('img')]
