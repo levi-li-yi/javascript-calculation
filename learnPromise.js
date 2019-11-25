@@ -36,7 +36,7 @@ MyPromise.prototype.then = function(onFulfilled, onRejected) {
     if (this.status === PENDING) {
         // 为了实现promise链式调用返回promise
         return bridgePromise = new MyPromise((resolve, reject) => {
-            // 回调收集
+            // 为了实现多次调用then: 收集回调
             self.onFulfilledCallback.push((value) => {
                 try{
                     onFulfilled = typeof onFulfilled === "function" ? onFulfilled : value => value;
