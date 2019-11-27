@@ -3,10 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <title>test</title>
+	<style>
+		.flip{
+			display: inline-block;
+			position: relative;
+			left: 200px;
+			top: 100px;
+			width: 60px;
+			height: 100px;
+			line-height: 100px;
+			border:solid 1px #000;
+			border-radius: 10px;
+			background-color: #fff;
+			font-size: 66px;
+			color: #fff;
+			box-shadow: 0 0 6px rgba(0,0,0,.5);
+			text-align: center;
+			font-family: "Harlow Solid Italic";
+			box-sizing: border-box;
+		}
+		.flip .digital:before, .flip .digital:after{
+			content: "";
+			position: absolute;
+			left: 0;
+			right:0;
+			background: #000;
+			overflow: hidden;
+		}
+		.flip .digital:before{
+			top: 0;
+			bottom: 50%;
+			border-radius: 10px 10px 0 0;
+			border-bottom: solid 1px #666;
+		}
+		.flip .digital:after{
+			top:50%;
+			bottom:0;
+			border-radius: 0 0 10px 10px;
+			line-height: 0;
+		}
+		.flip .number0:before, .flip .number0:after{
+			content: "0";
+		}
+		.flip .number1:before, .flip .number1:after{
+			content: "1";
+		}
+		.flip.down .front:before{
+			z-index: 3;
+		}
+		.flip.down .back:after{
+			z-index: 2;
+			transform-origin: 50% 0%;
+			transform: perspective(160px) rotateX(180deg);
+		}
+		.flip.down .front:after,
+		.flip.down .back:before{
+			z-index: 1;
+		}
+		.flip.up .front:after{
+			z-index: 3;
+		}
+		.flip.up .back:before{
+			z-index: 2;
+			transform-origin: 50% 100%;
+			transform: perspective(160px) rotateX(-180deg);
+		}
+		.flip.up .front:before,
+		.flip.up .back:after{
+			z-index: 1;
+		}
+		/*向下动画*/
+		.flip.down.go .front:before{
+			transform-origin: 50% 100%;
+			animation: frontFlipDown 0.6s ease-in-out both;
+			backface-visibility: hidden;
+		}
+		@keyframes frontFlipDown {
+			0%{
+				transform: perspective(160px) rotateX(0deg);
+			}
+			100%{
+				transform: perspective(160px) rotateX(-180deg);
+			}
+		}
+		.flip.down.go .back:after{
+			animation: backFlipDown 0.6s ease-in-out both;
+		}
+		@keyframes backFlipDown {
+			0%{
+				transform: perspective(160px) rotateX(180deg);
+			}
+			100%{
+				transform: perspective(160px) rotateX(0deg);
+			}
+		}
+		/*向上动画*/
+		.flip.up.go .front:after{
+			transform-origin: 50% 0;
+			animation: frontFilpUp 0.6s ease-in-out both;
+			backface-visibility: hidden;
+		}
+		@keyframes frontFilpUp {
+			0%{
+				transform: perspective(160px) rotateX(0deg);
+			}
+			100%{
+				transform: perspective(160px) rotateX(180deg);
+			}
+		}
+		.flip.up.go .back:before{
+			transform-origin: 50% 100%;
+			animation: backFlipUp 0.6s ease-in-out both;
+		}
+		@keyframes backFlipUp{
+			0%{
+				transform: perspective(160px) rotateX(-180deg);
+			}
+			100%{
+				transform: perspective(160px) rotateX(0deg);
+			}
+		}
+	</style>
 </head>
 <body>
 <script src="./skillPartOne.js" type="text/javascript"></script>
 <script src="./learnPromise.js" type="text/javascript"></script>
 
+<!--翻牌效果-->
+<div class="flip up go" id="flip">
+	<!--前方牌-->
+	<div class="digital front number0"></div>
+	<!--后方牌-->
+	<div class="digital back number1"></div>
+</div>
+<script>
+	setTimeout(() => {
+	    document.getElementById('flip')
+	}, 2000)
+</script>
 </body>
 </html>
